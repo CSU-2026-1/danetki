@@ -1,21 +1,28 @@
 # ----------------------------------------------------------------
 #  AI Worker — multi-stage build
-#  Стадия 1: компилируем в большом SDK-образе
-#  Стадия 2: копируем артефакты в маленький runtime-образ
+#
+#  ВАЖНО: этот Dockerfile собирается с context=. (корень репо),
+#  потому что AiWorker.csproj ссылается на ../../contracts/puzzle.proto
+#  для gRPC-кодогенерации. См. build.context в docker-compose.yml.
+#
+#  Папка Services с большой буквы — git так её зафиксировал.
 # ----------------------------------------------------------------
 
 # --- build stage ---
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Сначала только csproj — это даёт кэширование слоя dotnet restore,
+# Слой 1: только csproj — это даёт кэширование dotnet restore,
 # если зависимости не менялись.
-COPY *.csproj ./
-RUN dotnet restore
+COPY Services/ai-worker/AiWorker.csproj Services/ai-worker/
+RUN dotnet restore Services/ai-worker/AiWorker.csproj
 
-# Теперь весь исходный код
-COPY . .
-RUN dotnet publish -c Release -o /app /p:UseAppHost=false
+# Слой 2: исходники + протоколы
+COPY Services/ai-worker/ Services/ai-worker/
+COPY contracts/ contracts/
+
+RUN dotnet publish Services/ai-worker/AiWorker.csproj \
+    -c Release -o /app /p:UseAppHost=false
 
 # --- runtime stage ---
 FROM mcr.microsoft.com/dotnet/runtime:8.0
