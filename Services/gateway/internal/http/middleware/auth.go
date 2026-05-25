@@ -13,7 +13,9 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func AuthMiddleware(reg discovery.Registry) func(http.Handler) http.Handler {
+const authServiceName = "auth-service"
+
+func AuthMiddleware(reg discovery.Registry, fallback string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if strings.HasPrefix(r.URL.Path, "/auth/register") || strings.HasPrefix(r.URL.Path, "/auth/login") {
@@ -29,10 +31,10 @@ func AuthMiddleware(reg discovery.Registry) func(http.Handler) http.Handler {
 
 			token := strings.TrimPrefix(authHeader, "Bearer ")
 
-			addr := "danetka-auth:8080"
+			addr := discovery.Resolve(reg, authServiceName, fallback)
 
-			conn, error := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-			if error != nil {
+			conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			if err != nil {
 				http.Error(w, "Failed to connect to auth service", http.StatusInternalServerError)
 				return
 			}
@@ -42,8 +44,8 @@ func AuthMiddleware(reg discovery.Registry) func(http.Handler) http.Handler {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
-			resp, error := client.ValidateToken(ctx, &auth.ValidateTokenRequest{Token: token})
-			if error != nil || !resp.Valid {
+			resp, err := client.ValidateToken(ctx, &auth.ValidateTokenRequest{Token: token})
+			if err != nil || !resp.Valid {
 				http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
 				return
 			}

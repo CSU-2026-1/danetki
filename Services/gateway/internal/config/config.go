@@ -12,6 +12,10 @@ type Config struct {
 	ServiceID   string
 	ServiceHost string
 	ServicePort int
+
+	AuthServiceAddr   string
+	PuzzleServiceAddr string
+	ParserServiceAddr string
 }
 
 func Load() *Config {
@@ -37,5 +41,16 @@ func Load() *Config {
 		ServiceID:   "gateway-1",
 		ServiceHost: "gateway",
 		ServicePort: p,
+
+		AuthServiceAddr:   getEnv("AUTH_SERVICE_ADDR", "auth-service:50051"),
+		PuzzleServiceAddr: getEnv("PUZZLE_SERVICE_ADDR", "puzzle-service:50052"),
+		ParserServiceAddr: getEnv("PARSER_SERVICE_ADDR", "parser-service:50053"),
 	}
+}
+
+func getEnv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }

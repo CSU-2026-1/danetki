@@ -13,12 +13,20 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+const parserServiceName = "parser-service"
+
 type ParserHandler struct {
-	reg discovery.Registry
+	reg      discovery.Registry
+	fallback string
 }
 
-func NewParserHandler(reg discovery.Registry) *ParserHandler {
-	return &ParserHandler{reg: reg}
+func NewParserHandler(reg discovery.Registry, fallback string) *ParserHandler {
+	return &ParserHandler{reg: reg, fallback: fallback}
+}
+
+func (h *ParserHandler) dial() (*grpc.ClientConn, error) {
+	addr := discovery.Resolve(h.reg, parserServiceName, h.fallback)
+	return grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
 
 func (h *ParserHandler) Start(w http.ResponseWriter, r *http.Request) {
@@ -32,15 +40,13 @@ func (h *ParserHandler) Start(w http.ResponseWriter, r *http.Request) {
 		SourceUrl string `json:"source_url"`
 	}
 
-	if error := json.NewDecoder(r.Body).Decode(&req); error != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		req.Limit = 0
 		req.SourceUrl = ""
 	}
 
-	addr := "parser-service:50053"
-
-	conn, error := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if error != nil {
+	conn, err := h.dial()
+	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}
@@ -50,17 +56,16 @@ func (h *ParserHandler) Start(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	grpcResp, error := client.StartParsing(ctx, &parser.StartParsingRequest{
+	grpcResp, err := client.StartParsing(ctx, &parser.StartParsingRequest{
 		Limit:     req.Limit,
 		SourceUrl: req.SourceUrl,
 	})
-	if error != nil {
-		http.Error(w, error.Error(), http.StatusInternalServerError)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(grpcResp)
+	writeProtoJSON(w, grpcResp)
 }
 
 func (h *ParserHandler) Status(w http.ResponseWriter, r *http.Request) {
@@ -71,10 +76,8 @@ func (h *ParserHandler) Status(w http.ResponseWriter, r *http.Request) {
 
 	jobID := r.URL.Query().Get("job_id")
 
-	addr := "parser-service:50053"
-
-	conn, error := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if error != nil {
+	conn, err := h.dial()
+	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}
@@ -84,12 +87,11 @@ func (h *ParserHandler) Status(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
 
-	grpcResp, error := client.GetStatus(ctx, &parser.GetStatusRequest{JobId: jobID})
-	if error != nil {
-		http.Error(w, error.Error(), http.StatusNotFound)
+	grpcResp, err := client.GetStatus(ctx, &parser.GetStatusRequest{JobId: jobID})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(grpcResp)
+	writeProtoJSON(w, grpcResp)
 }
