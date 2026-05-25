@@ -25,7 +25,7 @@ func main() {
 		log.Printf("Successfully registered in Consul as '%s'", cfg.ServiceName)
 	}
 
-	router := gatewayHttp.NewRouter(registry)
+	router := gatewayHttp.NewRouter(registry, cfg)
 
 	log.Printf("API Gateway is running on port :%s", cfg.Port)
 	if err := http.ListenAndServe(":"+cfg.Port, router); err != nil {

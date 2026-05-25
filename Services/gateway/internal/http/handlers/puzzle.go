@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
@@ -14,19 +13,22 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+const puzzleServiceName = "puzzle-service"
+
 type PuzzleHandler struct {
-	reg discovery.Registry
+	reg      discovery.Registry
+	fallback string
 }
 
-func NewPuzzleHandler(reg discovery.Registry) *PuzzleHandler {
-	return &PuzzleHandler{reg: reg}
+func NewPuzzleHandler(reg discovery.Registry, fallback string) *PuzzleHandler {
+	return &PuzzleHandler{reg: reg, fallback: fallback}
 }
 
 func (h *PuzzleHandler) HandlePuzzle(w http.ResponseWriter, r *http.Request) {
-	addr := "danetka-puzzle:50052"
+	addr := discovery.Resolve(h.reg, puzzleServiceName, h.fallback)
 
-	conn, error := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if error != nil {
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}
@@ -37,13 +39,12 @@ func (h *PuzzleHandler) HandlePuzzle(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	if r.Method == http.MethodGet && r.URL.Path == "/puzzle/random" {
-		grpcResp, error := client.GetRandomPuzzle(ctx, &puzzle.GetRandomPuzzleRequest{})
-		if error != nil {
-			http.Error(w, error.Error(), http.StatusInternalServerError)
+		grpcResp, err := client.GetRandomPuzzle(ctx, &puzzle.GetRandomPuzzleRequest{})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(grpcResp)
+		writeProtoJSON(w, grpcResp)
 		return
 	}
 
@@ -54,13 +55,12 @@ func (h *PuzzleHandler) HandlePuzzle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		grpcResp, error := client.GetPuzzleById(ctx, &puzzle.GetPuzzleByIdRequest{PuzzleId: id})
-		if error != nil {
-			http.Error(w, error.Error(), http.StatusNotFound)
+		grpcResp, err := client.GetPuzzleById(ctx, &puzzle.GetPuzzleByIdRequest{PuzzleId: id})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(grpcResp)
+		writeProtoJSON(w, grpcResp)
 		return
 	}
 
