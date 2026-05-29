@@ -15,7 +15,7 @@ DotNetEnv.Env.TraversePath().Load();
 var builder = Host.CreateApplicationBuilder(args);
 
 // ----- LLM provider switch -----
-var llmProvider = builder.Configuration["LLM_PROVIDER"]?.ToLowerInvariant() ?? "ollama";
+var llmProvider = builder.Configuration["LLM_PROVIDER"]?.ToLowerInvariant() ?? "routerai";
 
 switch (llmProvider)
 {
@@ -38,20 +38,20 @@ switch (llmProvider)
         });
         break;
 
-    case "openai":
-        builder.Services.AddHttpClient<ILlmClient, OpenAiCompatibleLlmClient>(client =>
-        {
-            client.Timeout = TimeSpan.FromMinutes(2);
-        });
-        break;
-
     case "ollama":
-    default:
         builder.Services.AddHttpClient<ILlmClient, OllamaLlmClient>(client =>
         {
             var baseUrl = builder.Configuration["OLLAMA_URL"] ?? "http://localhost:11434";
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromMinutes(6);
+        });
+        break;
+
+    case "routerai":
+    default:
+        builder.Services.AddHttpClient<ILlmClient, RouterAiLlmClient>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(15);
         });
         break;
 }

@@ -1,0 +1,14 @@
+.git
+**/.venv
+**/venv
+**/__pycache__
+**/.pytest_cache
+**/node_modules
+**/bin
+**/obj
+**/.idea
+**/.vscode
+codebase.md
+generate_codebase.sh
+git_report.md
+codebase_dump.txt

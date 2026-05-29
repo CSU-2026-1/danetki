@@ -252,8 +252,7 @@ services:
       PUZZLE_SERVICE_ADDR: puzzle-service:50052
 
       # LLM provider — выбирается из .env (см. .env.example).
-      # По умолчанию ollama (локальный контейнер в этой же сети).
-      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_PROVIDER: ${LLM_PROVIDER:-routerai}
 
       OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
@@ -263,9 +262,7 @@ services:
       GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_PERS}
       GIGACHAT_TRUST_ALL_CERTS: ${GIGACHAT_TRUST_ALL_CERTS:-false}
 
-      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.deepseek.com/v1}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_MODEL: ${OPENAI_MODEL:-deepseek-chat}
+      ROUTER_AI_KEY: ${ROUTER_AI_KEY:-}
     depends_on:
       kafka:
         condition: service_healthy
