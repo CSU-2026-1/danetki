@@ -24,6 +24,12 @@ public class AuthDbContext(DbContextOptions<AuthDbContext> options) : DbContext(
             entity.Property(e => e.Username).HasColumnName("username").IsRequired().HasMaxLength(100);
             
             entity.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired().HasMaxLength(255);
+
+            entity.Property(e => e.Role)
+                .HasColumnName("role")
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasDefaultValue("User");
             
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("NOW()");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("NOW()");

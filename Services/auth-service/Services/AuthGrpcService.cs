@@ -117,7 +117,8 @@ public class AuthGrpcService(
         {
             Valid = false,
             UserId = string.Empty,
-            Email = string.Empty
+            Email = string.Empty,
+            Role = string.Empty
         };
 
         if (string.IsNullOrWhiteSpace(request.Token))
@@ -158,16 +159,18 @@ public class AuthGrpcService(
             var email = principal.FindFirst(ClaimTypes.Email)?.Value 
                         ?? principal.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
 
-            if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(email))
-            {
-                response.Valid = true;
-                response.UserId = userId;
-                response.Email = email;
-            }
-            else
+            var role = principal.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
             {
                 logger.LogWarning("Token is valid structurally, but missing required claims (sub or email).");
+                return Task.FromResult(response);
             }
+
+            response.Valid = true;
+            response.UserId = userId;
+            response.Email = email;
+            response.Role = role ?? "User";
         }
         catch (SecurityTokenExpiredException)
         {
@@ -204,7 +207,8 @@ public class AuthGrpcService(
             UserId = user.Id.ToString(),
             Email = user.Email,
             Username = user.Username,
-            CreatedAt = ((DateTimeOffset)user.CreatedAt).ToUnixTimeSeconds()
+            CreatedAt = ((DateTimeOffset)user.CreatedAt).ToUnixTimeSeconds(),
+            Role = MapToProtoRole(user.Role)
         };
     }
     
@@ -223,6 +227,7 @@ public class AuthGrpcService(
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
@@ -238,5 +243,15 @@ public class AuthGrpcService(
         var expiresAtUnix = ((DateTimeOffset)expiryDate).ToUnixTimeSeconds();
 
         return (tokenString, expiresAtUnix);
+    }
+
+    private static Role MapToProtoRole(string role)
+    {
+        if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            return Role.Admin;
+        }
+
+        return Role.User;
     }
 }
