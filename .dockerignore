@@ -22,13 +22,8 @@ Services/parser-service/
 # Тесты, документация, артефакты
 Services/ai-worker/tests/
 docs/
-e2e_test.sh
 *.md
 Danetka.sln
-codebase.md
-generate_codebase.sh
-git_report.md
-codebase_dump.txt
 
 # Инфра монтируется volume-ами, в COPY не участвует
 infra/

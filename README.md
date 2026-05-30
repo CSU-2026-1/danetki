@@ -125,8 +125,6 @@ danetka/
 │   └── postgres/
 │       └── init.sql
 ├── frontend/               # React SPA
-├── docs/
-│   └── architecture.txt
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
