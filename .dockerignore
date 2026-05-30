@@ -1,4 +1,11 @@
+# Уменьшаем build context для сервисов с context=.
+# Каждый Dockerfile копирует только свой каталог в Services/ + contracts/.
+
 .git
+.gitignore
+**/.git
+**/.idea
+**/.vscode
 **/.venv
 **/venv
 **/__pycache__
@@ -6,9 +13,22 @@
 **/node_modules
 **/bin
 **/obj
-**/.idea
-**/.vscode
+**/.DS_Store
+
+# Отдельные контексты сборки — в образы из корня не нужны
+frontend/
+Services/parser-service/
+
+# Тесты, документация, артефакты
+Services/ai-worker/tests/
+docs/
+e2e_test.sh
+*.md
+Danetka.sln
 codebase.md
 generate_codebase.sh
 git_report.md
 codebase_dump.txt
+
+# Инфра монтируется volume-ами, в COPY не участвует
+infra/
