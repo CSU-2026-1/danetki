@@ -80,6 +80,19 @@ export async function login(email: string, password: string): Promise<LoginRespo
   return data
 }
 
+export async function register(
+  email: string,
+  password: string,
+  username: string,
+): Promise<LoginResponse> {
+  const { data } = await apiClient.post<LoginResponse>('/auth/register', {
+    email,
+    password,
+    username,
+  })
+  return data
+}
+
 export async function getMe(): Promise<User> {
   const { data } = await apiClient.get<User>('/auth/me')
   return data

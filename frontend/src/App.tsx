@@ -2,10 +2,22 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom
 import { AdminLayout } from './pages/AdminLayout'
 import { AdminUsers } from './pages/AdminUsers'
 import { Login } from './pages/Login'
+import { Register } from './pages/Register'
 import { ParserControl } from './pages/ParserControl'
 import { PuzzlesList } from './pages/PuzzlesList'
 import { UserDashboard } from './pages/UserDashboard'
 import { useAuthStore } from './store/authStore'
+
+function RegisterRoute() {
+  const token = useAuthStore((s) => s.token)
+  const role = useAuthStore((s) => s.role)
+
+  if (token) {
+    return <Navigate to={role === 'Admin' ? '/admin/puzzles' : '/dashboard'} replace />
+  }
+
+  return <Register />
+}
 
 function LoginRoute() {
   const token = useAuthStore((s) => s.token)
@@ -64,6 +76,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginRoute />} />
+        <Route path="/register" element={<RegisterRoute />} />
         <Route path="/" element={<RootRedirect />} />
 
         <Route element={<UserRoute />}>
