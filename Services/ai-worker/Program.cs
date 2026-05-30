@@ -38,15 +38,6 @@ switch (llmProvider)
         });
         break;
 
-    case "ollama":
-        builder.Services.AddHttpClient<ILlmClient, OllamaLlmClient>(client =>
-        {
-            var baseUrl = builder.Configuration["OLLAMA_URL"] ?? "http://localhost:11434";
-            client.BaseAddress = new Uri(baseUrl);
-            client.Timeout = TimeSpan.FromMinutes(6);
-        });
-        break;
-
     case "routerai":
     default:
         builder.Services.AddHttpClient<ILlmClient, RouterAiLlmClient>(client =>
