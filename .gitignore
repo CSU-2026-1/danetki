@@ -147,3 +147,9 @@ x86/
 ### Project-specific
 # AI Worker runtime artifacts (LLM input/output capture)
 services/ai-worker/logs/
+
+# macOS
+.DS_Store
+
+# Editor
+.cursor/
