@@ -16,14 +16,10 @@
 
 ### 1. Клонировать репозиторий
 
-Клонируй в каталог **только с латинскими буквами** — так сборка быстрее и стабильнее:
-
 ```bash
-git clone https://github.com/your-org/danetka.git ~/danetka
-cd ~/danetka
+git clone https://github.com/your-org/danetka.git
+cd danetka
 ```
-
-Если проект уже лежит в пути с кириллицей — это тоже работает: см. шаг 2 (`.env` отключает BuildKit).
 
 ### 2. Создать .env файл
 
@@ -31,8 +27,6 @@ cd ~/danetka
 cp .env.example .env
 # Открыть .env и указать ROUTER_AI_KEY
 ```
-
-Файл `.env` нужен не только для API-ключей: Compose подхватывает из него настройки Docker-сборки автоматически.
 
 ### 3. Сгенерировать gRPC код из контрактов
 ```bash
@@ -69,10 +63,6 @@ docker compose up -d --build --scale gateway=2
 ```bash
 docker compose up -d --scale gateway=2
 ```
-
-Первая сборка долгая (6 образов). Повторная с `--build` — секунды/минуты: кэш слоёв, `cache_from` и узкий `.dockerignore`.
-
-**Максимальная скорость:** клон в `~/danetka` (латиница в пути) → в `.env` поставить `DOCKER_BUILDKIT=1` и `COMPOSE_DOCKER_CLI_BUILD=1`.
 
 ## Адреса после запуска
 
