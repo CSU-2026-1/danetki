@@ -12,20 +12,6 @@ services:
   #  ИНФРАСТРУКТУРА
   # --------------------------------------------------------------
 
-  consul:
-    image: consul:1.15
-    container_name: danetka-consul
-    ports:
-      - "8500:8500"     # веб-интерфейс: http://localhost:8500
-    command: agent -server -bootstrap -ui -client=0.0.0.0
-    networks:
-      - danetka-net
-    healthcheck:
-      test: ["CMD", "consul", "members"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: danetka-zookeeper
@@ -114,30 +100,6 @@ services:
       timeout: 5s
       retries: 5
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: danetka-ollama
-    ports:
-      - "11434:11434"   # для тестирования из хост-машины (curl)
-    volumes:
-      - ollama-data:/root/.ollama   # кэш скачанных моделей
-    networks:
-      - danetka-net
-    # Раскомментируй блок ниже на машинах с NVIDIA GPU.
-    # Требуется установленный NVIDIA Container Toolkit.
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
-    healthcheck:
-      test: ["CMD", "ollama", "list"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-
   # --------------------------------------------------------------
   #  СЕРВИСЫ
   # --------------------------------------------------------------
@@ -148,15 +110,9 @@ services:
       dockerfile: Services/gateway/Dockerfile
     environment:
       PORT: 8000
-      CONSUL_ADDR: consul:8500
-      # Адреса сервисов — Gateway получает их через Consul,
-      # но эти переменные используются как fallback
       AUTH_SERVICE_ADDR: auth-service:50051
       PUZZLE_SERVICE_ADDR: puzzle-service:50052
       PARSER_SERVICE_ADDR: parser-service:50053
-    depends_on:
-      consul:
-        condition: service_healthy
     deploy:
       replicas: 2
     networks:
@@ -192,7 +148,6 @@ services:
     # порт НЕ пробрасывается наружу — только внутри Docker-сети
     environment:
       GRPC_PORT: 50051
-      CONSUL_ADDR: consul:8500
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: auth_db
@@ -205,21 +160,17 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      consul:
-        condition: service_healthy
     networks:
       - danetka-net
     restart: on-failure
 
   puzzle-service:
-    platform: linux/amd64
     build:
       context: .
       dockerfile: Services/puzzle-service/Dockerfile
     container_name: danetka-puzzle
     environment:
       GRPC_PORT: 50052
-      CONSUL_ADDR: consul:8500
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: puzzle_db
@@ -230,8 +181,6 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      consul:
         condition: service_healthy
     networks:
       - danetka-net
@@ -250,26 +199,11 @@ services:
       KAFKA_TOPIC_INPUT: stories.raw
       KAFKA_TOPIC_DLQ: stories.dlq
       PUZZLE_SERVICE_ADDR: puzzle-service:50052
-
-      # LLM provider — выбирается из .env (см. .env.example).
       LLM_PROVIDER: ${LLM_PROVIDER:-routerai}
-
-      OLLAMA_URL: http://ollama:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
-
-      GIGACHAT_AUTH_KEY: ${GIGACHAT_AUTH_KEY:-}
-      GIGACHAT_MODEL: ${GIGACHAT_MODEL:-GigaChat}
-      GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_PERS}
-      GIGACHAT_TRUST_ALL_CERTS: ${GIGACHAT_TRUST_ALL_CERTS:-false}
-
       ROUTER_AI_KEY: ${ROUTER_AI_KEY:-}
     depends_on:
       kafka:
         condition: service_healthy
-      ollama:
-        condition: service_healthy
-      # puzzle-service не указываем намеренно — он ещё не реализован,
-      # а DLQ + retry-логика и так корректно переживут его отсутствие.
     networks:
       - danetka-net
     restart: on-failure
@@ -282,7 +216,6 @@ services:
     container_name: danetka-parser
     environment:
       GRPC_PORT: 50053
-      CONSUL_ADDR: consul:8500
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_TOPIC_OUTPUT: stories.raw
       MONGO_URI: mongodb://danetka:danetka_secret@mongodb:27017/parser_db?authSource=admin
@@ -291,8 +224,6 @@ services:
       mongodb:
         condition: service_healthy
       kafka:
-        condition: service_healthy
-      consul:
         condition: service_healthy
     networks:
       - danetka-net
@@ -309,4 +240,3 @@ networks:
 volumes:
   postgres-data:
   mongodb-data:
-  ollama-data:

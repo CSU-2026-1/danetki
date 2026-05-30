@@ -6,7 +6,7 @@
 
 | Сервис | Язык | Порт gRPC | Описание |
 |---|---|---|---|
-| API Gateway | Go | 8000 (HTTP) | Единая точка входа |
+| API Gateway | Go | 8000 (HTTP, внутри сети) | REST API, проксирует gRPC |
 | Auth Service | C# | 50051 | Регистрация, логин, JWT |
 | Puzzle Service | C# | 50052 | Хранение и выдача данеток |
 | AI Worker | C# | — | Обработка историй через LLM |
@@ -23,7 +23,7 @@ cd danetka
 ### 2. Создать .env файл
 ```bash
 cp .env.example .env
-# Открыть .env и вставить OPENAI_API_KEY
+# Открыть .env и указать ROUTER_AI_KEY
 ```
 
 ### 3. Сгенерировать gRPC код из контрактов
@@ -42,35 +42,42 @@ python -m grpc_tools.protoc -I../../contracts --python_out=. --grpc_python_out=.
 
 ### 4. Запустить всё
 ```bash
-docker-compose up --build
+docker compose up --build
+```
+
+Для балансировки Gateway на двух репликах:
+```bash
+docker compose up -d --build --scale gateway=2
 ```
 
 ## Адреса после запуска
 
 | Сервис | Адрес |
 |---|---|
-| API | http://localhost:8000 |
-| Consul UI | http://localhost:8500 |
+| Приложение и API | http://localhost |
+| REST API | http://localhost/api/v1 |
+
+Nginx на порту **80** — единая точка входа: фронтенд и API Gateway.
 
 ## API
 
+Базовый префикс: `/api/v1`
+
 ### Авторизация
 ```
-POST /auth/register   { "email": "...", "password": "...", "username": "..." }
-POST /auth/login      { "email": "...", "password": "..." }
+POST /api/v1/auth/register   { "email": "...", "password": "...", "username": "..." }
+POST /api/v1/auth/login      { "email": "...", "password": "..." }
 ```
 
 ### Данетки
 ```
-GET /puzzle/random
-GET /puzzle/:id
-GET /puzzle/list?page=1&page_size=10
+GET /api/v1/puzzles?page=1&page_size=10
 ```
 
-### Парсинг
+### Парсинг (требуется JWT и роль Admin)
 ```
-POST /parser/start    { "limit": 10 }
-GET  /parser/status?job_id=...
+POST /api/v1/parser/start    { "limit": 10, "source_url": "https://..." }
+GET  /api/v1/parser/status?job_id=...
 ```
 
 ## Структура репозитория
@@ -90,8 +97,10 @@ danetka/
 │   ├── ai-worker/          # C#
 │   └── parser-service/     # Python
 ├── infra/
+│   ├── nginx/
 │   └── postgres/
 │       └── init.sql
+├── frontend/               # React SPA
 ├── docs/
 │   └── architecture.txt
 ├── docker-compose.yml
@@ -101,8 +110,9 @@ danetka/
 
 ## Переменные окружения
 
-Все переменные описаны в `docker-compose.yml`. Для локальной разработки создайте `.env`:
+Основные переменные описаны в `docker-compose.yml` и `.env.example`. Для локальной разработки создайте `.env`:
 
 ```env
-OPENAI_API_KEY=sk-...
+LLM_PROVIDER=routerai
+ROUTER_AI_KEY=sk-...
 ```
