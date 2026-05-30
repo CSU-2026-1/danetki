@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/danetka/gateway/internal/clients"
-	"github.com/danetka/gateway/internal/rest/middleware"
+	"github.com/danetka/gateway/internal/rest/contextkeys"
 	authpb "github.com/danetka/gateway/pkg/grpc/auth"
 	"github.com/gin-gonic/gin"
 )
@@ -80,7 +80,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) GetMe(c *gin.Context) {
-	userID, ok := c.Get(middleware.ContextUserIDKey)
+	userID, ok := c.Get(contextkeys.UserID)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "user id is missing"})
 		return
@@ -104,7 +104,7 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 }
 
 func (h *AuthHandler) ConsumeToken(c *gin.Context) {
-	userID, ok := c.Get(middleware.ContextUserIDKey)
+	userID, ok := c.Get(contextkeys.UserID)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, ErrorResponse{Error: "user id is missing"})
 		return

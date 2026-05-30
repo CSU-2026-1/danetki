@@ -1,10 +1,13 @@
+using Danetka.AuthService.Data;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Danetka.AuthService.Migrations
 {
-    /// <inheritdoc />
+    [DbContext(typeof(AuthDbContext))]
+    [Migration("20260530120000_AddSaaSFields")]
     public partial class AddSaaSFields : Migration
     {
         /// <inheritdoc />

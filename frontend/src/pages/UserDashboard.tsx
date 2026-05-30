@@ -1,4 +1,4 @@
-import { Eye, EyeOff, LogOut, Sparkles } from 'lucide-react'
+import { Eye, EyeOff, Crown, LogOut, Sparkles } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -10,6 +10,7 @@ import {
   type User,
 } from '../api/services'
 import { CopyButton } from '../components/CopyButton'
+import { ProSubscriptionModal } from '../components/ProSubscriptionModal'
 import { TelegramExportButton } from '../components/TelegramExportButton'
 import { Button } from '../components/ui/Button'
 import { useCopyToClipboard } from '../lib/useCopyToClipboard'
@@ -29,6 +30,9 @@ export function UserDashboard() {
   const [hiddenPart, setHiddenPart] = useState<string | null>(null)
   const [isLoadingAnswer, setIsLoadingAnswer] = useState(false)
   const [answerError, setAnswerError] = useState<string | null>(null)
+  const [proModalOpen, setProModalOpen] = useState(false)
+
+  const isOutOfTokens = error === 'Токены закончились. Оформите подписку Pro.'
 
   const loadProfile = useCallback(async () => {
     try {
@@ -117,7 +121,7 @@ export function UserDashboard() {
 
       <header className="relative z-10 border-b border-white/5 bg-zinc-950/80 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-indigo-400/80">
               Danetka
             </p>
@@ -129,10 +133,22 @@ export function UserDashboard() {
               </p>
             )}
           </div>
-          <Button variant="secondary" className="h-9 px-3 text-xs" onClick={handleLogout}>
-            <LogOut className="h-3.5 w-3.5" />
-            Выйти
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            {profile && profile.subscription_plan === 'Trial' && (
+              <Button
+                variant="secondary"
+                className="h-9 px-3 text-xs"
+                onClick={() => setProModalOpen(true)}
+              >
+                <Crown className="h-3.5 w-3.5 text-amber-400" />
+                Pro
+              </Button>
+            )}
+            <Button variant="secondary" className="h-9 px-3 text-xs" onClick={handleLogout}>
+              <LogOut className="h-3.5 w-3.5" />
+              Выйти
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -227,7 +243,18 @@ export function UserDashboard() {
             )}
 
             {error && (
-              <p className="mb-6 text-sm text-red-400">{error}</p>
+              <div className="mb-6 space-y-3">
+                <p className="text-sm text-red-400">{error}</p>
+                {isOutOfTokens && (
+                  <Button
+                    className="h-11 rounded-full px-6 shadow-lg shadow-indigo-900/40"
+                    onClick={() => setProModalOpen(true)}
+                  >
+                    <Crown className="h-4 w-4" />
+                    Оформить Pro
+                  </Button>
+                )}
+              </div>
             )}
 
             <div className="flex justify-center">
@@ -248,6 +275,8 @@ export function UserDashboard() {
           </div>
         </div>
       </main>
+
+      <ProSubscriptionModal open={proModalOpen} onClose={() => setProModalOpen(false)} />
     </div>
   )
 }

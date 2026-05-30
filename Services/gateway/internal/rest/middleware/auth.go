@@ -5,18 +5,13 @@ import (
 	"strings"
 
 	"github.com/danetka/gateway/internal/clients"
+	"github.com/danetka/gateway/internal/rest/contextkeys"
 	"github.com/danetka/gateway/internal/rest/handlers"
 	authpb "github.com/danetka/gateway/pkg/grpc/auth"
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	ContextUserIDKey  = "user_id"
-	ContextUserRoleKey = "role"
-	ContextUserEmailKey = "email"
-
-	adminRoleName = "Admin"
-)
+const adminRoleName = "Admin"
 
 func Auth(grpcClients *clients.Clients) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -40,16 +35,16 @@ func Auth(grpcClients *clients.Clients) gin.HandlerFunc {
 			return
 		}
 
-		c.Set(ContextUserIDKey, response.UserId)
-		c.Set(ContextUserRoleKey, response.Role)
-		c.Set(ContextUserEmailKey, response.Email)
+		c.Set(contextkeys.UserID, response.UserId)
+		c.Set(contextkeys.UserRole, response.Role)
+		c.Set(contextkeys.UserEmail, response.Email)
 		c.Next()
 	}
 }
 
 func RequireRole(requiredRole string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		roleValue, exists := c.Get(ContextUserRoleKey)
+		roleValue, exists := c.Get(contextkeys.UserRole)
 		if !exists {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, handlers.ErrorResponse{Error: "user role is missing"})
 			return
