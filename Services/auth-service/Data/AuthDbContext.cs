@@ -43,7 +43,7 @@ public class AuthDbContext(DbContextOptions<AuthDbContext> options) : DbContext(
             entity.ToTable("user_roles");
             entity.HasKey(ur => new { ur.UserId, ur.RoleId });
             
-            entity.HasOne(ur => ur.User).WithMany().HasForeignKey(ur => ur.UserId);
+            entity.HasOne(ur => ur.User).WithMany(u => u.UserRoles).HasForeignKey(ur => ur.UserId);
             entity.HasOne(ur => ur.Role).WithMany().HasForeignKey(ur => ur.RoleId);
         });
     }
