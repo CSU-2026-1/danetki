@@ -17,7 +17,7 @@ namespace PuzzleService.Services
         private readonly PuzzleDbContext _dbContext;
         private readonly IDistributedCache _cache;
 
-        public PuzzleGrpcService(PuzzleDbContext dbContext)
+        public PuzzleGrpcService(PuzzleDbContext dbContext, IDistributedCache cache)
         {
             _dbContext = dbContext;
             _cache = cache;
