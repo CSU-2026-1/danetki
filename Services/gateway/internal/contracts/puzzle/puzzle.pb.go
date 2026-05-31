@@ -2,16 +2,17 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v7.34.1
-// source: puzzle.proto
+// source: contracts/puzzle.proto
 
 package puzzle
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -31,7 +32,7 @@ type GetRandomPuzzleRequest struct {
 
 func (x *GetRandomPuzzleRequest) Reset() {
 	*x = GetRandomPuzzleRequest{}
-	mi := &file_puzzle_proto_msgTypes[0]
+	mi := &file_contracts_puzzle_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +44,7 @@ func (x *GetRandomPuzzleRequest) String() string {
 func (*GetRandomPuzzleRequest) ProtoMessage() {}
 
 func (x *GetRandomPuzzleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_puzzle_proto_msgTypes[0]
+	mi := &file_contracts_puzzle_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +57,7 @@ func (x *GetRandomPuzzleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRandomPuzzleRequest.ProtoReflect.Descriptor instead.
 func (*GetRandomPuzzleRequest) Descriptor() ([]byte, []int) {
-	return file_puzzle_proto_rawDescGZIP(), []int{0}
+	return file_contracts_puzzle_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *GetRandomPuzzleRequest) GetExcludeIds() []string {
@@ -75,7 +76,7 @@ type GetPuzzleByIdRequest struct {
 
 func (x *GetPuzzleByIdRequest) Reset() {
 	*x = GetPuzzleByIdRequest{}
-	mi := &file_puzzle_proto_msgTypes[1]
+	mi := &file_contracts_puzzle_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -87,7 +88,7 @@ func (x *GetPuzzleByIdRequest) String() string {
 func (*GetPuzzleByIdRequest) ProtoMessage() {}
 
 func (x *GetPuzzleByIdRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_puzzle_proto_msgTypes[1]
+	mi := &file_contracts_puzzle_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -100,7 +101,7 @@ func (x *GetPuzzleByIdRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPuzzleByIdRequest.ProtoReflect.Descriptor instead.
 func (*GetPuzzleByIdRequest) Descriptor() ([]byte, []int) {
-	return file_puzzle_proto_rawDescGZIP(), []int{1}
+	return file_contracts_puzzle_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetPuzzleByIdRequest) GetPuzzleId() string {
@@ -120,7 +121,7 @@ type ListPuzzlesRequest struct {
 
 func (x *ListPuzzlesRequest) Reset() {
 	*x = ListPuzzlesRequest{}
-	mi := &file_puzzle_proto_msgTypes[2]
+	mi := &file_contracts_puzzle_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -132,7 +133,7 @@ func (x *ListPuzzlesRequest) String() string {
 func (*ListPuzzlesRequest) ProtoMessage() {}
 
 func (x *ListPuzzlesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_puzzle_proto_msgTypes[2]
+	mi := &file_contracts_puzzle_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -145,7 +146,7 @@ func (x *ListPuzzlesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPuzzlesRequest.ProtoReflect.Descriptor instead.
 func (*ListPuzzlesRequest) Descriptor() ([]byte, []int) {
-	return file_puzzle_proto_rawDescGZIP(), []int{2}
+	return file_contracts_puzzle_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListPuzzlesRequest) GetPage() int32 {
@@ -173,7 +174,7 @@ type ListPuzzlesResponse struct {
 
 func (x *ListPuzzlesResponse) Reset() {
 	*x = ListPuzzlesResponse{}
-	mi := &file_puzzle_proto_msgTypes[3]
+	mi := &file_contracts_puzzle_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -185,7 +186,7 @@ func (x *ListPuzzlesResponse) String() string {
 func (*ListPuzzlesResponse) ProtoMessage() {}
 
 func (x *ListPuzzlesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_puzzle_proto_msgTypes[3]
+	mi := &file_contracts_puzzle_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -198,7 +199,7 @@ func (x *ListPuzzlesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPuzzlesResponse.ProtoReflect.Descriptor instead.
 func (*ListPuzzlesResponse) Descriptor() ([]byte, []int) {
-	return file_puzzle_proto_rawDescGZIP(), []int{3}
+	return file_contracts_puzzle_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListPuzzlesResponse) GetPuzzles() []*PuzzleResponse {
@@ -234,7 +235,7 @@ type PuzzleResponse struct {
 
 func (x *PuzzleResponse) Reset() {
 	*x = PuzzleResponse{}
-	mi := &file_puzzle_proto_msgTypes[4]
+	mi := &file_contracts_puzzle_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -246,7 +247,7 @@ func (x *PuzzleResponse) String() string {
 func (*PuzzleResponse) ProtoMessage() {}
 
 func (x *PuzzleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_puzzle_proto_msgTypes[4]
+	mi := &file_contracts_puzzle_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -259,7 +260,7 @@ func (x *PuzzleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PuzzleResponse.ProtoReflect.Descriptor instead.
 func (*PuzzleResponse) Descriptor() ([]byte, []int) {
-	return file_puzzle_proto_rawDescGZIP(), []int{4}
+	return file_contracts_puzzle_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *PuzzleResponse) GetPuzzleId() string {
@@ -290,6 +291,94 @@ func (x *PuzzleResponse) GetCreatedAt() int64 {
 	return 0
 }
 
+type GetPuzzleHiddenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PuzzleId      string                 `protobuf:"bytes,1,opt,name=puzzle_id,json=puzzleId,proto3" json:"puzzle_id,omitempty"` // UUID данетки, ответ на которую нужно получить
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPuzzleHiddenRequest) Reset() {
+	*x = GetPuzzleHiddenRequest{}
+	mi := &file_contracts_puzzle_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPuzzleHiddenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPuzzleHiddenRequest) ProtoMessage() {}
+
+func (x *GetPuzzleHiddenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_puzzle_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPuzzleHiddenRequest.ProtoReflect.Descriptor instead.
+func (*GetPuzzleHiddenRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_puzzle_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetPuzzleHiddenRequest) GetPuzzleId() string {
+	if x != nil {
+		return x.PuzzleId
+	}
+	return ""
+}
+
+type PuzzleHiddenResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	HiddenPart    string                 `protobuf:"bytes,1,opt,name=hidden_part,json=hiddenPart,proto3" json:"hidden_part,omitempty"` // Текст скрытой части (разгадка)
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PuzzleHiddenResponse) Reset() {
+	*x = PuzzleHiddenResponse{}
+	mi := &file_contracts_puzzle_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PuzzleHiddenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PuzzleHiddenResponse) ProtoMessage() {}
+
+func (x *PuzzleHiddenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_puzzle_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PuzzleHiddenResponse.ProtoReflect.Descriptor instead.
+func (*PuzzleHiddenResponse) Descriptor() ([]byte, []int) {
+	return file_contracts_puzzle_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PuzzleHiddenResponse) GetHiddenPart() string {
+	if x != nil {
+		return x.HiddenPart
+	}
+	return ""
+}
+
 type SavePuzzleRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OpenPart      string                 `protobuf:"bytes,1,opt,name=open_part,json=openPart,proto3" json:"open_part,omitempty"`       // открытая часть данетки
@@ -302,7 +391,7 @@ type SavePuzzleRequest struct {
 
 func (x *SavePuzzleRequest) Reset() {
 	*x = SavePuzzleRequest{}
-	mi := &file_puzzle_proto_msgTypes[5]
+	mi := &file_contracts_puzzle_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -314,7 +403,7 @@ func (x *SavePuzzleRequest) String() string {
 func (*SavePuzzleRequest) ProtoMessage() {}
 
 func (x *SavePuzzleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_puzzle_proto_msgTypes[5]
+	mi := &file_contracts_puzzle_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -327,7 +416,7 @@ func (x *SavePuzzleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SavePuzzleRequest.ProtoReflect.Descriptor instead.
 func (*SavePuzzleRequest) Descriptor() ([]byte, []int) {
-	return file_puzzle_proto_rawDescGZIP(), []int{5}
+	return file_contracts_puzzle_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *SavePuzzleRequest) GetOpenPart() string {
@@ -368,7 +457,7 @@ type SavePuzzleResponse struct {
 
 func (x *SavePuzzleResponse) Reset() {
 	*x = SavePuzzleResponse{}
-	mi := &file_puzzle_proto_msgTypes[6]
+	mi := &file_contracts_puzzle_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -380,7 +469,7 @@ func (x *SavePuzzleResponse) String() string {
 func (*SavePuzzleResponse) ProtoMessage() {}
 
 func (x *SavePuzzleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_puzzle_proto_msgTypes[6]
+	mi := &file_contracts_puzzle_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -393,7 +482,7 @@ func (x *SavePuzzleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SavePuzzleResponse.ProtoReflect.Descriptor instead.
 func (*SavePuzzleResponse) Descriptor() ([]byte, []int) {
-	return file_puzzle_proto_rawDescGZIP(), []int{6}
+	return file_contracts_puzzle_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SavePuzzleResponse) GetPuzzleId() string {
@@ -410,11 +499,11 @@ func (x *SavePuzzleResponse) GetSuccess() bool {
 	return false
 }
 
-var File_puzzle_proto protoreflect.FileDescriptor
+var File_contracts_puzzle_proto protoreflect.FileDescriptor
 
-const file_puzzle_proto_rawDesc = "" +
+const file_contracts_puzzle_proto_rawDesc = "" +
 	"\n" +
-	"\fpuzzle.proto\x12\x06puzzle\"9\n" +
+	"\x16contracts/puzzle.proto\x12\x06puzzle\"9\n" +
 	"\x16GetRandomPuzzleRequest\x12\x1f\n" +
 	"\vexclude_ids\x18\x01 \x03(\tR\n" +
 	"excludeIds\"3\n" +
@@ -433,7 +522,12 @@ const file_puzzle_proto_rawDesc = "" +
 	"\n" +
 	"source_url\x18\x03 \x01(\tR\tsourceUrl\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x04 \x01(\x03R\tcreatedAt\"\x8b\x01\n" +
+	"created_at\x18\x04 \x01(\x03R\tcreatedAt\"5\n" +
+	"\x16GetPuzzleHiddenRequest\x12\x1b\n" +
+	"\tpuzzle_id\x18\x01 \x01(\tR\bpuzzleId\"7\n" +
+	"\x14PuzzleHiddenResponse\x12\x1f\n" +
+	"\vhidden_part\x18\x01 \x01(\tR\n" +
+	"hiddenPart\"\x8b\x01\n" +
 	"\x11SavePuzzleRequest\x12\x1b\n" +
 	"\topen_part\x18\x01 \x01(\tR\bopenPart\x12\x1f\n" +
 	"\vhidden_part\x18\x02 \x01(\tR\n" +
@@ -443,73 +537,78 @@ const file_puzzle_proto_rawDesc = "" +
 	"\bstory_id\x18\x04 \x01(\tR\astoryId\"K\n" +
 	"\x12SavePuzzleResponse\x12\x1b\n" +
 	"\tpuzzle_id\x18\x01 \x01(\tR\bpuzzleId\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess2\xae\x02\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess2\xff\x02\n" +
 	"\rPuzzleService\x12I\n" +
 	"\x0fGetRandomPuzzle\x12\x1e.puzzle.GetRandomPuzzleRequest\x1a\x16.puzzle.PuzzleResponse\x12E\n" +
 	"\rGetPuzzleById\x12\x1c.puzzle.GetPuzzleByIdRequest\x1a\x16.puzzle.PuzzleResponse\x12F\n" +
-	"\vListPuzzles\x12\x1a.puzzle.ListPuzzlesRequest\x1a\x1b.puzzle.ListPuzzlesResponse\x12C\n" +
+	"\vListPuzzles\x12\x1a.puzzle.ListPuzzlesRequest\x1a\x1b.puzzle.ListPuzzlesResponse\x12O\n" +
+	"\x0fGetPuzzleHidden\x12\x1e.puzzle.GetPuzzleHiddenRequest\x1a\x1c.puzzle.PuzzleHiddenResponse\x12C\n" +
 	"\n" +
 	"SavePuzzle\x12\x19.puzzle.SavePuzzleRequest\x1a\x1a.puzzle.SavePuzzleResponseB@Z#github.com/danetka/contracts/puzzle\xaa\x02\x18Danetka.Contracts.Puzzleb\x06proto3"
 
 var (
-	file_puzzle_proto_rawDescOnce sync.Once
-	file_puzzle_proto_rawDescData []byte
+	file_contracts_puzzle_proto_rawDescOnce sync.Once
+	file_contracts_puzzle_proto_rawDescData []byte
 )
 
-func file_puzzle_proto_rawDescGZIP() []byte {
-	file_puzzle_proto_rawDescOnce.Do(func() {
-		file_puzzle_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_puzzle_proto_rawDesc), len(file_puzzle_proto_rawDesc)))
+func file_contracts_puzzle_proto_rawDescGZIP() []byte {
+	file_contracts_puzzle_proto_rawDescOnce.Do(func() {
+		file_contracts_puzzle_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_contracts_puzzle_proto_rawDesc), len(file_contracts_puzzle_proto_rawDesc)))
 	})
-	return file_puzzle_proto_rawDescData
+	return file_contracts_puzzle_proto_rawDescData
 }
 
-var file_puzzle_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
-var file_puzzle_proto_goTypes = []any{
+var file_contracts_puzzle_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_contracts_puzzle_proto_goTypes = []any{
 	(*GetRandomPuzzleRequest)(nil), // 0: puzzle.GetRandomPuzzleRequest
 	(*GetPuzzleByIdRequest)(nil),   // 1: puzzle.GetPuzzleByIdRequest
 	(*ListPuzzlesRequest)(nil),     // 2: puzzle.ListPuzzlesRequest
 	(*ListPuzzlesResponse)(nil),    // 3: puzzle.ListPuzzlesResponse
 	(*PuzzleResponse)(nil),         // 4: puzzle.PuzzleResponse
-	(*SavePuzzleRequest)(nil),      // 5: puzzle.SavePuzzleRequest
-	(*SavePuzzleResponse)(nil),     // 6: puzzle.SavePuzzleResponse
+	(*GetPuzzleHiddenRequest)(nil), // 5: puzzle.GetPuzzleHiddenRequest
+	(*PuzzleHiddenResponse)(nil),   // 6: puzzle.PuzzleHiddenResponse
+	(*SavePuzzleRequest)(nil),      // 7: puzzle.SavePuzzleRequest
+	(*SavePuzzleResponse)(nil),     // 8: puzzle.SavePuzzleResponse
 }
-var file_puzzle_proto_depIdxs = []int32{
+var file_contracts_puzzle_proto_depIdxs = []int32{
 	4, // 0: puzzle.ListPuzzlesResponse.puzzles:type_name -> puzzle.PuzzleResponse
 	0, // 1: puzzle.PuzzleService.GetRandomPuzzle:input_type -> puzzle.GetRandomPuzzleRequest
 	1, // 2: puzzle.PuzzleService.GetPuzzleById:input_type -> puzzle.GetPuzzleByIdRequest
 	2, // 3: puzzle.PuzzleService.ListPuzzles:input_type -> puzzle.ListPuzzlesRequest
-	5, // 4: puzzle.PuzzleService.SavePuzzle:input_type -> puzzle.SavePuzzleRequest
-	4, // 5: puzzle.PuzzleService.GetRandomPuzzle:output_type -> puzzle.PuzzleResponse
-	4, // 6: puzzle.PuzzleService.GetPuzzleById:output_type -> puzzle.PuzzleResponse
-	3, // 7: puzzle.PuzzleService.ListPuzzles:output_type -> puzzle.ListPuzzlesResponse
-	6, // 8: puzzle.PuzzleService.SavePuzzle:output_type -> puzzle.SavePuzzleResponse
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
+	5, // 4: puzzle.PuzzleService.GetPuzzleHidden:input_type -> puzzle.GetPuzzleHiddenRequest
+	7, // 5: puzzle.PuzzleService.SavePuzzle:input_type -> puzzle.SavePuzzleRequest
+	4, // 6: puzzle.PuzzleService.GetRandomPuzzle:output_type -> puzzle.PuzzleResponse
+	4, // 7: puzzle.PuzzleService.GetPuzzleById:output_type -> puzzle.PuzzleResponse
+	3, // 8: puzzle.PuzzleService.ListPuzzles:output_type -> puzzle.ListPuzzlesResponse
+	6, // 9: puzzle.PuzzleService.GetPuzzleHidden:output_type -> puzzle.PuzzleHiddenResponse
+	8, // 10: puzzle.PuzzleService.SavePuzzle:output_type -> puzzle.SavePuzzleResponse
+	6, // [6:11] is the sub-list for method output_type
+	1, // [1:6] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_puzzle_proto_init() }
-func file_puzzle_proto_init() {
-	if File_puzzle_proto != nil {
+func init() { file_contracts_puzzle_proto_init() }
+func file_contracts_puzzle_proto_init() {
+	if File_contracts_puzzle_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_puzzle_proto_rawDesc), len(file_puzzle_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_puzzle_proto_rawDesc), len(file_contracts_puzzle_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_puzzle_proto_goTypes,
-		DependencyIndexes: file_puzzle_proto_depIdxs,
-		MessageInfos:      file_puzzle_proto_msgTypes,
+		GoTypes:           file_contracts_puzzle_proto_goTypes,
+		DependencyIndexes: file_contracts_puzzle_proto_depIdxs,
+		MessageInfos:      file_contracts_puzzle_proto_msgTypes,
 	}.Build()
-	File_puzzle_proto = out.File
-	file_puzzle_proto_goTypes = nil
-	file_puzzle_proto_depIdxs = nil
+	File_contracts_puzzle_proto = out.File
+	file_contracts_puzzle_proto_goTypes = nil
+	file_contracts_puzzle_proto_depIdxs = nil
 }
