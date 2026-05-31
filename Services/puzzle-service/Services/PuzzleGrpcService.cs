@@ -152,5 +152,50 @@ namespace PuzzleService.Services
 
             return response;
         }
+
+        // 5. Выдает скрытую часть данетки по ID
+        public override async Task<PuzzleHiddenResponse> GetPuzzleHidden(GetPuzzleHiddenRequest request, ServerCallContext context)
+        {
+            string cacheKey = $"puzzle:hidden:{request.PuzzleId}";
+
+            try
+            {
+                var cachedHidden = await _cache.GetStringAsync(cacheKey);
+                if (!string.IsNullOrEmpty(cachedHidden))
+                {
+                    return new PuzzleHiddenResponse { HiddenPart = cachedHidden };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Redis Error] Ошибка при чтении hidden_part: {ex.Message}");
+            }
+
+            var puzzle = await _dbContext.Puzzles.FindAsync(request.PuzzleId);
+
+            if (puzzle == null)
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"Данетка с ID {request.PuzzleId} не найдена"));
+            }
+
+            try
+            {
+                var cacheOptions = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+                };
+                
+                await _cache.SetStringAsync(cacheKey, puzzle.HiddenPart, cacheOptions);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Redis Error] Ошибка при записи hidden_part: {ex.Message}");
+            }
+
+            return new PuzzleHiddenResponse
+            {
+                HiddenPart = puzzle.HiddenPart
+            };
+        }
     }
 }
