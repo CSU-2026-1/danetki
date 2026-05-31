@@ -1,6 +1,10 @@
+using System.IdentityModel.Tokens.Jwt;
 using Danetka.AuthService.Data;
+using Danetka.AuthService.Models;
 using Danetka.AuthService.Services;
 using Microsoft.EntityFrameworkCore;
+
+JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 
