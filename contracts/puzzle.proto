@@ -22,6 +22,9 @@ service PuzzleService {
   // Получить список данеток с пагинацией (для пользователя)
   rpc ListPuzzles (ListPuzzlesRequest) returns (ListPuzzlesResponse);
 
+  // Получить скрытую часть данетки (разгадку) по ID
+  rpc GetPuzzleHidden (GetPuzzleHiddenRequest) returns (PuzzleHiddenResponse);
+
   // Сохранить готовую данетку — только для AI Worker
   rpc SavePuzzle (SavePuzzleRequest) returns (SavePuzzleResponse);
 }
@@ -70,6 +73,18 @@ message PuzzleResponse {
   string open_part   = 2;  // текст загадки — то что видит игрок
   string source_url  = 3;  // источник истории
   int64  created_at  = 4;  // Unix timestamp создания
+}
+
+// ----------------------------------------------------------------
+//  GetPuzzleHidden — Получение скрытой части (ответа)
+// ----------------------------------------------------------------
+
+message GetPuzzleHiddenRequest {
+  string puzzle_id = 1; // UUID данетки, ответ на которую нужно получить
+}
+
+message PuzzleHiddenResponse {
+  string hidden_part = 1; // Текст скрытой части (разгадка)
 }
 
 // ----------------------------------------------------------------
