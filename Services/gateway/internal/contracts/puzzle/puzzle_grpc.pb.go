@@ -2,12 +2,13 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.1
 // - protoc             v7.34.1
-// source: puzzle.proto
+// source: contracts/puzzle.proto
 
 package puzzle
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -22,6 +23,7 @@ const (
 	PuzzleService_GetRandomPuzzle_FullMethodName = "/puzzle.PuzzleService/GetRandomPuzzle"
 	PuzzleService_GetPuzzleById_FullMethodName   = "/puzzle.PuzzleService/GetPuzzleById"
 	PuzzleService_ListPuzzles_FullMethodName     = "/puzzle.PuzzleService/ListPuzzles"
+	PuzzleService_GetPuzzleHidden_FullMethodName = "/puzzle.PuzzleService/GetPuzzleHidden"
 	PuzzleService_SavePuzzle_FullMethodName      = "/puzzle.PuzzleService/SavePuzzle"
 )
 
@@ -35,6 +37,8 @@ type PuzzleServiceClient interface {
 	GetPuzzleById(ctx context.Context, in *GetPuzzleByIdRequest, opts ...grpc.CallOption) (*PuzzleResponse, error)
 	// Получить список данеток с пагинацией (для пользователя)
 	ListPuzzles(ctx context.Context, in *ListPuzzlesRequest, opts ...grpc.CallOption) (*ListPuzzlesResponse, error)
+	// Получить скрытую часть данетки (разгадку) по ID
+	GetPuzzleHidden(ctx context.Context, in *GetPuzzleHiddenRequest, opts ...grpc.CallOption) (*PuzzleHiddenResponse, error)
 	// Сохранить готовую данетку — только для AI Worker
 	SavePuzzle(ctx context.Context, in *SavePuzzleRequest, opts ...grpc.CallOption) (*SavePuzzleResponse, error)
 }
@@ -77,6 +81,16 @@ func (c *puzzleServiceClient) ListPuzzles(ctx context.Context, in *ListPuzzlesRe
 	return out, nil
 }
 
+func (c *puzzleServiceClient) GetPuzzleHidden(ctx context.Context, in *GetPuzzleHiddenRequest, opts ...grpc.CallOption) (*PuzzleHiddenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PuzzleHiddenResponse)
+	err := c.cc.Invoke(ctx, PuzzleService_GetPuzzleHidden_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *puzzleServiceClient) SavePuzzle(ctx context.Context, in *SavePuzzleRequest, opts ...grpc.CallOption) (*SavePuzzleResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SavePuzzleResponse)
@@ -97,6 +111,8 @@ type PuzzleServiceServer interface {
 	GetPuzzleById(context.Context, *GetPuzzleByIdRequest) (*PuzzleResponse, error)
 	// Получить список данеток с пагинацией (для пользователя)
 	ListPuzzles(context.Context, *ListPuzzlesRequest) (*ListPuzzlesResponse, error)
+	// Получить скрытую часть данетки (разгадку) по ID
+	GetPuzzleHidden(context.Context, *GetPuzzleHiddenRequest) (*PuzzleHiddenResponse, error)
 	// Сохранить готовую данетку — только для AI Worker
 	SavePuzzle(context.Context, *SavePuzzleRequest) (*SavePuzzleResponse, error)
 	mustEmbedUnimplementedPuzzleServiceServer()
@@ -117,6 +133,9 @@ func (UnimplementedPuzzleServiceServer) GetPuzzleById(context.Context, *GetPuzzl
 }
 func (UnimplementedPuzzleServiceServer) ListPuzzles(context.Context, *ListPuzzlesRequest) (*ListPuzzlesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListPuzzles not implemented")
+}
+func (UnimplementedPuzzleServiceServer) GetPuzzleHidden(context.Context, *GetPuzzleHiddenRequest) (*PuzzleHiddenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPuzzleHidden not implemented")
 }
 func (UnimplementedPuzzleServiceServer) SavePuzzle(context.Context, *SavePuzzleRequest) (*SavePuzzleResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SavePuzzle not implemented")
@@ -196,6 +215,24 @@ func _PuzzleService_ListPuzzles_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PuzzleService_GetPuzzleHidden_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPuzzleHiddenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PuzzleServiceServer).GetPuzzleHidden(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PuzzleService_GetPuzzleHidden_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PuzzleServiceServer).GetPuzzleHidden(ctx, req.(*GetPuzzleHiddenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PuzzleService_SavePuzzle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SavePuzzleRequest)
 	if err := dec(in); err != nil {
@@ -234,10 +271,14 @@ var PuzzleService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PuzzleService_ListPuzzles_Handler,
 		},
 		{
+			MethodName: "GetPuzzleHidden",
+			Handler:    _PuzzleService_GetPuzzleHidden_Handler,
+		},
+		{
 			MethodName: "SavePuzzle",
 			Handler:    _PuzzleService_SavePuzzle_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "puzzle.proto",
+	Metadata: "contracts/puzzle.proto",
 }

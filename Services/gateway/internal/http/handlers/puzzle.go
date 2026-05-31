@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
@@ -35,8 +36,22 @@ func (h *PuzzleHandler) HandlePuzzle(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	client := puzzle.NewPuzzleServiceClient(conn)
-	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*30)
 	defer cancel()
+
+	if r.Method == http.MethodGet && r.URL.Path == "/puzzle/all" {
+		grpcResp, err := client.ListPuzzles(ctx, &puzzle.ListPuzzlesRequest{
+			Page:     1,
+			PageSize: 50,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(grpcResp)
+		return
+	}
 
 	if r.Method == http.MethodGet && r.URL.Path == "/puzzle/random" {
 		grpcResp, err := client.GetRandomPuzzle(ctx, &puzzle.GetRandomPuzzleRequest{})
@@ -44,6 +59,26 @@ func (h *PuzzleHandler) HandlePuzzle(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		writeProtoJSON(w, grpcResp)
+		return
+	}
+
+	if r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/puzzle/hidden/") {
+		id := strings.TrimPrefix(r.URL.Path, "/puzzle/hidden/")
+		if id == "" {
+			http.Error(w, "Missing puzzle ID", http.StatusBadRequest)
+			return
+		}
+
+		grpcResp, err := client.GetPuzzleHidden(ctx, &puzzle.GetPuzzleHiddenRequest{
+			PuzzleId: id,
+		})
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
 		writeProtoJSON(w, grpcResp)
 		return
 	}
