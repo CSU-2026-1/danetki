@@ -13,7 +13,6 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(int.Parse(grpcPort));
 });
 
-// Добавляем поддержку gRPC в контейнер зависимостей
 builder.Services.AddGrpc();
 
 var consulAddress = builder.Configuration["CONSUL_ADDR"] ?? "consul:8500";
@@ -22,6 +21,12 @@ builder.Services.AddSingleton<IConsulClient, ConsulClient>(p => new ConsulClient
     consulConfig.Address = new Uri($"http://{consulAddress}");
 }));
 builder.Services.AddHostedService<ConsulHostedService>();
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "Puzzle_";
+});
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
