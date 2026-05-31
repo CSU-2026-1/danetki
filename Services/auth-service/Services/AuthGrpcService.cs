@@ -54,12 +54,28 @@ public class AuthGrpcService(
         };
 
         dbContext.Users.Add(user);
+
+        var userRole = await dbContext.Roles
+            .FirstOrDefaultAsync(r => r.Name == "user", context.CancellationToken);
+
+        if (userRole == null)
+        {
+            logger.LogError("Critical error: Default role 'user' not found in database.");
+            throw new RpcException(new Status(StatusCode.Internal, "Internal server configuration error."));
+        }
+
+        dbContext.UserRoles.Add(new UserRole
+        {
+            User =  user,
+            RoleId = userRole.Id,
+        });
+        
         await dbContext.SaveChangesAsync(context.CancellationToken);
 
         logger.LogInformation("Successfully registered user: {UserId}", user.Id);
 
-        // 5. Генерация JWT токена
-        var (token, expiresAt) = GenerateJwtToken(user);
+        // Генерация JWT токена
+        var (token, expiresAt) = await GenerateJwtToken(user);
 
         return new AuthResponse
         {
@@ -83,23 +99,15 @@ public class AuthGrpcService(
         var user = await dbContext.Users
             .FirstOrDefaultAsync(u => u.Email == normalizedEmail, context.CancellationToken);
 
-        if (user == null)
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             logger.LogWarning("Login failed: User not found for email {Email}", normalizedEmail);
             throw new RpcException(new Status(StatusCode.Unauthenticated, "Invalid email or password."));
         }
 
-        var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
-        
-        if (!isPasswordValid)
-        {
-            logger.LogWarning("Login failed: Invalid password for email {Email}", normalizedEmail);
-            throw new RpcException(new Status(StatusCode.Unauthenticated, "Invalid email or password."));
-        }
-
         logger.LogInformation("Successfully logged in user: {UserId}", user.Id);
 
-        var (token, expiresAt) = GenerateJwtToken(user);
+        var (token, expiresAt) = await GenerateJwtToken(user);
 
         return new AuthResponse
         {
@@ -189,8 +197,10 @@ public class AuthGrpcService(
         {
             throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid user_id format. Must be UUID."));
         }
-
+        
         var user = await dbContext.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == userGuid, context.CancellationToken);
 
@@ -198,7 +208,11 @@ public class AuthGrpcService(
         {
             throw new RpcException(new Status(StatusCode.NotFound, "User not found."));
         }
+        
+        var roles = user.UserRoles.Select(r => r.Role).ToList();
 
+        logger.LogInformation("User {UserId} found with roles: {Roles}", user.Id, string.Join(", ", roles));
+        
         return new UserResponse
         {
             UserId = user.Id.ToString(),
@@ -208,21 +222,27 @@ public class AuthGrpcService(
         };
     }
     
-    private (string Token, long ExpiresAtUnix) GenerateJwtToken(User user)
-    {
+    private async Task<(string Token, long ExpiresAtUnix)> GenerateJwtToken(User user)
+    {        
+		var roleName = await dbContext.UserRoles
+			.Where(ur => ur.UserId == user.Id)
+			.Select(ur => ur.Role.Name)
+            .FirstOrDefaultAsync() ?? "user";
+		
         var secretKey = configuration["Jwt:Secret"] 
                         ?? throw new InvalidOperationException("JWT Secret is not configured.");
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         
-        var expirationHours = configuration.GetValue<int>("Jwt:ExpirationHours", 24);
+        var expirationHours = configuration.GetValue<int>("Jwt:ExpirationHours", 1);
         var expiryDate = DateTime.UtcNow.AddHours(expirationHours);
 
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim("role", roleName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
