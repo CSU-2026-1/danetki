@@ -36,6 +36,15 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
     db.Database.Migrate();
+    
+    if (!db.Roles.Any())
+    {
+        db.Roles.AddRange(
+            new Role { Id = Guid.NewGuid(), Name = "user" }, 
+            new Role { Id = Guid.NewGuid(), Name = "admin" }
+            );
+        db.SaveChanges();
+    }
 }
 
 app.MapGrpcService<AuthGrpcService>();
