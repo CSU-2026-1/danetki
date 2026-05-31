@@ -5,6 +5,8 @@ using PuzzleService.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
+using Microsoft.Extensions.Caching.Distributed;
 
 using Danetka.Contracts.Puzzle; 
 
@@ -13,10 +15,12 @@ namespace PuzzleService.Services
     public class PuzzleGrpcService : Danetka.Contracts.Puzzle.PuzzleService.PuzzleServiceBase
     {
         private readonly PuzzleDbContext _dbContext;
+        private readonly IDistributedCache _cache;
 
         public PuzzleGrpcService(PuzzleDbContext dbContext)
         {
             _dbContext = dbContext;
+            _cache = cache;
         }
 
         //  Принимает и сохраняет готовую данетку от AI Worker
@@ -32,6 +36,7 @@ namespace PuzzleService.Services
 
             _dbContext.Puzzles.Add(entity);
             await _dbContext.SaveChangesAsync();
+            await _cache.RemoveAsync("puzzles:page:1:size:10");
 
             return new SavePuzzleResponse
             {
@@ -43,6 +48,14 @@ namespace PuzzleService.Services
         //  Выдает конкретную данетку по ID (БЕЗ hidden_part)
         public override async Task<PuzzleResponse> GetPuzzleById(GetPuzzleByIdRequest request, ServerCallContext context)
         {
+            string cacheKey = $"puzzle:{request.PuzzleId}";
+
+            var cachedPuzzle = await _cache.GetStringAsync(cacheKey);
+            if (!string.IsNullOrEmpty(cachedPuzzle))
+            {
+                return JsonSerializer.Deserialize<PuzzleResponse>(cachedPuzzle);
+            }
+
             var puzzle = await _dbContext.Puzzles.FindAsync(request.PuzzleId);
 
             if (puzzle == null)
@@ -50,13 +63,21 @@ namespace PuzzleService.Services
                 throw new RpcException(new Status(StatusCode.NotFound, $"Данетка с ID {request.PuzzleId} не найдена"));
             }
 
-            return new PuzzleResponse
+            var response = new PuzzleResponse   
             {
                 PuzzleId = puzzle.Id,
                 OpenPart = puzzle.OpenPart,
                 SourceUrl = puzzle.SourceUrl,
                 CreatedAt = ((DateTimeOffset)puzzle.CreatedAt).ToUnixTimeSeconds() // Конвертируем в Unix timestamp
             };
+
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+            };
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(response), cacheOptions);
+
+            return response;
         }
 
         // Выдает случайную данетку с учетом исключений (exclude_ids)
@@ -93,6 +114,14 @@ namespace PuzzleService.Services
             int pageSize = Math.Clamp(request.PageSize, 1, 50);
             int page = Math.Max(request.Page, 1);
 
+            string cacheKey = $"puzzles:page:{page}:size:{pageSize}";
+
+            var cachedList = await _cache.GetStringAsync(cacheKey);
+            if (!string.IsNullOrEmpty(cachedList))
+            {
+                return JsonSerializer.Deserialize<ListPuzzlesResponse>(cachedList);
+            }
+
             var totalItems = await _dbContext.Puzzles.CountAsync();
 
             var puzzles = await _dbContext.Puzzles
@@ -114,6 +143,12 @@ namespace PuzzleService.Services
             };
             
             response.Puzzles.AddRange(puzzles);
+
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+            };
+            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(response), cacheOptions);
 
             return response;
         }
