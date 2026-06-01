@@ -36,7 +36,6 @@ namespace PuzzleService.Services
 
             _dbContext.Puzzles.Add(entity);
             await _dbContext.SaveChangesAsync();
-            await _cache.RemoveAsync("puzzles:page:1:size:10");
 
             return new SavePuzzleResponse
             {
@@ -114,14 +113,6 @@ namespace PuzzleService.Services
             int pageSize = Math.Clamp(request.PageSize, 1, 50);
             int page = Math.Max(request.Page, 1);
 
-            string cacheKey = $"puzzles:page:{page}:size:{pageSize}";
-
-            var cachedList = await _cache.GetStringAsync(cacheKey);
-            if (!string.IsNullOrEmpty(cachedList))
-            {
-                return JsonSerializer.Deserialize<ListPuzzlesResponse>(cachedList);
-            }
-
             var totalItems = await _dbContext.Puzzles.CountAsync();
 
             var puzzles = await _dbContext.Puzzles
@@ -141,14 +132,8 @@ namespace PuzzleService.Services
                 Total = totalItems,
                 Page = page
             };
-            
-            response.Puzzles.AddRange(puzzles);
 
-            var cacheOptions = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-            };
-            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(response), cacheOptions);
+            response.Puzzles.AddRange(puzzles);
 
             return response;
         }
