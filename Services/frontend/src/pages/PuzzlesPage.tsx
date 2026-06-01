@@ -131,7 +131,7 @@ export function PuzzlesPage() {
       const data = await getAllPuzzles(targetPage, PAGE_SIZE)
       setPuzzles(data.puzzles ?? [])
       setTotal(data.total ?? 0)
-      setPage(data.page ?? targetPage)
+      setPage(targetPage)
     } catch {
       setError('Не удалось загрузить данетки')
     } finally {
