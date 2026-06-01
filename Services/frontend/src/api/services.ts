@@ -94,8 +94,13 @@ export async function getAllPuzzles(
 }
 
 export async function getRandomPuzzle(): Promise<Puzzle> {
-  const { data } = await apiClient.get<Puzzle>('/puzzle/random')
-  return data
+  const { data } = await apiClient.get<Record<string, unknown>>('/puzzle/random')
+  return normalizePuzzle(data)
+}
+
+export async function getPuzzleById(id: string): Promise<Puzzle> {
+  const { data } = await apiClient.get<Record<string, unknown>>(`/puzzle/${id}`)
+  return normalizePuzzle(data)
 }
 
 export async function getPuzzleHidden(id: string): Promise<PuzzleHiddenResponse> {

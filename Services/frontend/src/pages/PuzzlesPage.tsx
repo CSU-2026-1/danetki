@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Eye, EyeOff, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getAllPuzzles, getPuzzleHidden, type Puzzle } from '../api/services'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -9,9 +10,10 @@ const PAGE_SIZE = 10
 
 type PuzzleCardProps = {
   puzzle: Puzzle
+  onOpen: () => void
 }
 
-function PuzzleCard({ puzzle }: PuzzleCardProps) {
+function PuzzleCard({ puzzle, onOpen }: PuzzleCardProps) {
   const [revealed, setRevealed] = useState(false)
   const [hiddenPart, setHiddenPart] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -44,7 +46,10 @@ function PuzzleCard({ puzzle }: PuzzleCardProps) {
   }
 
   return (
-    <Card className="flex flex-col justify-between">
+    <Card
+      className="flex cursor-pointer flex-col justify-between transition-all duration-200 hover:border-zinc-700/80"
+      onClick={onOpen}
+    >
       <div>
         <p className="text-sm leading-relaxed text-zinc-200">{puzzle.open_part}</p>
 
@@ -71,6 +76,7 @@ function PuzzleCard({ puzzle }: PuzzleCardProps) {
               rel="noopener noreferrer"
               className="block truncate text-xs text-indigo-400 hover:text-indigo-300"
               title={puzzle.source_url}
+              onClick={(e) => e.stopPropagation()}
             >
               Источник
             </a>
@@ -82,7 +88,10 @@ function PuzzleCard({ puzzle }: PuzzleCardProps) {
         <Button
           variant="secondary"
           className="h-8 shrink-0 px-3 text-xs"
-          onClick={toggleAnswer}
+          onClick={(e) => {
+            e.stopPropagation()
+            void toggleAnswer()
+          }}
           disabled={isLoading}
         >
           {isLoading ? (
@@ -105,6 +114,7 @@ function PuzzleCard({ puzzle }: PuzzleCardProps) {
 }
 
 export function PuzzlesPage() {
+  const navigate = useNavigate()
   const [puzzles, setPuzzles] = useState<Puzzle[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -167,7 +177,11 @@ export function PuzzlesPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {puzzles.map((puzzle) => (
-          <PuzzleCard key={puzzle.puzzle_id} puzzle={puzzle} />
+          <PuzzleCard
+            key={puzzle.puzzle_id}
+            puzzle={puzzle}
+            onOpen={() => navigate(`/puzzles/${puzzle.puzzle_id}`)}
+          />
         ))}
       </div>
 

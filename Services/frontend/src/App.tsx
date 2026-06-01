@@ -83,6 +83,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/puzzles" element={<PuzzlesPage />} />
+            <Route path="/puzzles/:id" element={<RandomPuzzlePage />} />
             <Route path="/random" element={<RandomPuzzlePage />} />
             <Route element={<AdminRoute />}>
               <Route path="/parser" element={<ParserPage />} />
