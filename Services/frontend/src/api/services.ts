@@ -57,14 +57,39 @@ export async function register(
   return data
 }
 
+type PuzzlesApiPayload = {
+  puzzles?: Puzzle[]
+  Puzzles?: Puzzle[]
+  total?: number
+  Total?: number
+  page?: number
+  Page?: number
+}
+
+function normalizePuzzle(raw: Record<string, unknown>): Puzzle {
+  return {
+    puzzle_id: String(raw.puzzle_id ?? raw.PuzzleId ?? raw.puzzleId ?? ''),
+    open_part: String(raw.open_part ?? raw.OpenPart ?? raw.openPart ?? ''),
+    source_url: String(raw.source_url ?? raw.SourceUrl ?? raw.sourceUrl ?? ''),
+    created_at: Number(raw.created_at ?? raw.CreatedAt ?? raw.createdAt ?? 0),
+  }
+}
+
 export async function getAllPuzzles(
   page = 1,
   pageSize = 10,
 ): Promise<PuzzlesResponse> {
-  const { data } = await apiClient.get<PuzzlesResponse>('/puzzle/all', {
+  const { data } = await apiClient.get<PuzzlesApiPayload>('/puzzle/all', {
     params: { page, page_size: pageSize },
   })
-  return data
+
+  const rawPuzzles = (data.puzzles ?? data.Puzzles ?? []) as Record<string, unknown>[]
+
+  return {
+    puzzles: rawPuzzles.map((item) => normalizePuzzle(item)),
+    total: data.total ?? data.Total ?? 0,
+    page: data.page ?? data.Page ?? page,
+  }
 }
 
 export async function getRandomPuzzle(): Promise<Puzzle> {
