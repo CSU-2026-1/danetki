@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { apiClient } from './client'
 
 export type AuthResponse = {
@@ -102,20 +103,60 @@ export async function getPuzzleHidden(id: string): Promise<PuzzleHiddenResponse>
   return data
 }
 
+type ParserStatusPayload = Record<string, unknown>
+
+const STATUS_BY_NUMBER = [
+  'STATUS_UNKNOWN',
+  'STATUS_RUNNING',
+  'STATUS_DONE',
+  'STATUS_FAILED',
+] as const
+
+function normalizeParserStatus(raw: ParserStatusPayload): ParserStatusResponse {
+  const statusRaw = raw.status ?? raw.Status
+  let status: string
+  if (typeof statusRaw === 'number') {
+    status = STATUS_BY_NUMBER[statusRaw] ?? 'STATUS_UNKNOWN'
+  } else {
+    status = String(statusRaw ?? 'STATUS_UNKNOWN')
+  }
+
+  return {
+    job_id: String(raw.job_id ?? raw.JobId ?? raw.jobId ?? ''),
+    status,
+    total_found: Number(raw.total_found ?? raw.TotalFound ?? raw.totalFound ?? 0),
+    total_queued: Number(raw.total_queued ?? raw.TotalQueued ?? raw.totalQueued ?? 0),
+    total_skipped: Number(raw.total_skipped ?? raw.TotalSkipped ?? raw.totalSkipped ?? 0),
+    error: String(raw.error ?? raw.Error ?? ''),
+    started_at: Number(raw.started_at ?? raw.StartedAt ?? raw.startedAt ?? 0),
+    finished_at: Number(raw.finished_at ?? raw.FinishedAt ?? raw.finishedAt ?? 0),
+  }
+}
+
 export async function startParser(
   limit: number,
   sourceUrl: string,
 ): Promise<StartParserResponse> {
-  const { data } = await apiClient.post<StartParserResponse>('/parser/start', {
+  const { data } = await apiClient.post<Record<string, unknown>>('/parser/start', {
     limit,
     source_url: sourceUrl,
   })
-  return data
+  return {
+    job_id: String(data.job_id ?? data.JobId ?? data.jobId ?? ''),
+    message: String(data.message ?? data.Message ?? ''),
+  }
 }
 
-export async function getParserStatus(jobId?: string): Promise<ParserStatusResponse> {
-  const { data } = await apiClient.get<ParserStatusResponse>('/parser/status', {
-    params: jobId ? { job_id: jobId } : undefined,
-  })
-  return data
+export async function getParserStatus(jobId?: string): Promise<ParserStatusResponse | null> {
+  try {
+    const { data } = await apiClient.get<ParserStatusPayload>('/parser/status', {
+      params: jobId ? { job_id: jobId } : undefined,
+    })
+    return normalizeParserStatus(data)
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null
+    }
+    throw error
+  }
 }

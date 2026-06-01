@@ -1,5 +1,12 @@
 import axios from 'axios'
-import { getAuthToken } from '../store/authStore'
+import { getAuthToken, useAuthStore } from '../store/authStore'
+
+function redirectToAuth() {
+  useAuthStore.getState().clearAuth()
+  if (window.location.pathname !== '/auth') {
+    window.location.assign('/auth')
+  }
+}
 
 const baseURL = import.meta.env.VITE_API_GATEWAY_URL ?? ''
 
@@ -19,3 +26,13 @@ apiClient.interceptors.request.use((config) => {
 
   return config
 })
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      redirectToAuth()
+    }
+    return Promise.reject(error)
+  },
+)

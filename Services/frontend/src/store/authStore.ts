@@ -10,7 +10,27 @@ type JwtPayload = {
   email?: string
   role?: string
   Role?: string
+  exp?: number
   'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'?: string
+}
+
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = jwtDecode<JwtPayload>(token)
+    if (!payload.exp) return false
+    return payload.exp * 1000 < Date.now()
+  } catch {
+    return true
+  }
+}
+
+function readTokenClaims(token: string) {
+  const payload = jwtDecode<JwtPayload>(token)
+  return {
+    userId: payload.sub ?? null,
+    email: payload.email ?? null,
+    role: parseRole(payload),
+  }
 }
 
 function parseRole(payload: JwtPayload): UserRole {
@@ -41,13 +61,11 @@ export const useAuthStore = create<AuthState>()(
       email: null,
       role: null,
       setToken: (token) => {
-        const payload = jwtDecode<JwtPayload>(token)
-        set({
-          token,
-          userId: payload.sub ?? null,
-          email: payload.email ?? null,
-          role: parseRole(payload),
-        })
+        if (isTokenExpired(token)) {
+          set({ token: null, userId: null, email: null, role: null })
+          return
+        }
+        set({ token, ...readTokenClaims(token) })
       },
       clearAuth: () =>
         set({
@@ -61,15 +79,15 @@ export const useAuthStore = create<AuthState>()(
       name: STORAGE_KEY,
       partialize: (state) => ({ token: state.token }),
       onRehydrateStorage: () => (state) => {
-        if (state?.token) {
-          try {
-            const payload = jwtDecode<JwtPayload>(state.token)
-            state.userId = payload.sub ?? null
-            state.email = payload.email ?? null
-            state.role = parseRole(payload)
-          } catch {
-            state.clearAuth()
-          }
+        if (!state?.token) return
+        if (isTokenExpired(state.token)) {
+          state.clearAuth()
+          return
+        }
+        try {
+          Object.assign(state, readTokenClaims(state.token))
+        } catch {
+          state.clearAuth()
         }
       },
     },
